@@ -24,6 +24,23 @@ namespace NLog.Targets.AmazonSES
         public string From { get; set; }
         public string To { get; set; }
 
+        protected override void Write(AsyncLogEventInfo logEvent)
+        {
+            var logMessage = this.Layout.Render(logEvent.LogEvent);
+
+            // Queue up the message
+            var message = new Message();
+            message.WithBody(new Body
+            {
+                Text = new Content { Charset = "UTF-8", Data = logMessage }
+                //,Html = new Content { Charset = "UTF-8", Data = logMessage }
+            });
+            message.WithSubject(new Content { Charset = "UTF-8", Data = Subject.Render(logEvent.LogEvent) });
+            _queue.Enqueue(message);
+
+            StartMta();
+        }
+
         protected override void Write(AsyncLogEventInfo[] logEvents)
         {
             var logMessage = logEvents.Aggregate(string.Empty,
