@@ -1,0 +1,9 @@
+Bin
+bin
+obj
+logging
+Logs
+*ReSharper*
+*.mdf
+*.ldf 
+*.suo
